@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.soprafs19.entity;
 import ch.uzh.ifi.seal.soprafs19.constant.UserStatus;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,11 +20,11 @@ public class User implements Serializable {
 	@GeneratedValue
 	private Long id;
 	
-	@Column(nullable = false) 
-	private String name;
-	
 	@Column(nullable = false, unique = true) 
 	private String username;
+
+	@Column(nullable = false)
+	private String password;
 	
 	@Column(nullable = false, unique = true) 
 	private String token;
@@ -31,20 +32,46 @@ public class User implements Serializable {
 	@Column(nullable = false)
 	private UserStatus status;
 
+	@Column()
+	private LocalDate dateOfBirth;
+
+	@Column()
+	private LocalDate dateOfCreation;
+
+	public static long getSerialVersionUID() {
+		return serialVersionUID;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public LocalDate getDateOfBirth() {
+		return dateOfBirth;
+	}
+
+	public void setDateOfBirth(LocalDate dateOfBirth) {
+		this.dateOfBirth = dateOfBirth;
+	}
+
+	public LocalDate getDateOfCreation() {
+		return dateOfCreation;
+	}
+
+	public void setDateOfCreation(LocalDate dateOfCreation) {
+		this.dateOfCreation = dateOfCreation;
+	}
+
 	public Long getId() {
 		return id;
 	}
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getUsername() {
