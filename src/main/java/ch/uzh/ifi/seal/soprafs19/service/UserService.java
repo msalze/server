@@ -3,12 +3,17 @@ package ch.uzh.ifi.seal.soprafs19.service;
 import ch.uzh.ifi.seal.soprafs19.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs19.entity.User;
 import ch.uzh.ifi.seal.soprafs19.repository.UserRepository;
+import org.apache.juli.OneLineFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,22 +39,27 @@ public class UserService {
     public User createUser(User newUser) {
         //  TODO: get user and set status to online (insted of new user)
         newUser.setToken(UUID.randomUUID().toString());
-        newUser.setStatus(UserStatus.ONLINE);
+        newUser.setStatus(UserStatus.OFFLINE);
+        newUser.setDateOfCreation(LocalDate.now());
+        if (userRepository.existsByUsername(newUser.getUsername())) {
+            throw new UsernameTakenException();
+        }
         userRepository.save(newUser);
         log.debug("Created Information for User: {}", newUser);
         return newUser;
     }
 
-    public String loginUser(User user){
-
-        User search = userRepository.findByUsernameAndPassword(user.getUsername(), user.getPassword());
-        if (search != null && search.equals(user)) {
-            user.setStatus(UserStatus.ONLINE);
-            userRepository.save(user);
-            return "/user/" + user.getId().toString();
+    public ResponseEntity<User> loginUser(User user){
+        try {
+            User search = userRepository.findByUsernameAndPassword(user.getUsername(), user.getPassword());
+            search.setStatus(UserStatus.ONLINE);
+            search.setToken(UUID.randomUUID().toString());
+            userRepository.save(search);
+            // return value either: "/user/" + search.getId().toString() or token
+            return new ResponseEntity<User>(search, new HttpHeaders(), HttpStatus.OK);
+        } catch (Exception ex) {
+            throw new WrongLoginException();
         }
-        return ""; // cannot return null
-
     }
 
     public User getUserById(Long userId) {

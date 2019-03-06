@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.soprafs19.entity.User;
 import ch.uzh.ifi.seal.soprafs19.repository.UserRepository;
 import ch.uzh.ifi.seal.soprafs19.service.UserService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -40,14 +41,8 @@ public class UserController {
         return service.getUsers();
     }
 
-    @PostMapping("/create") // add user or say that failed
-    String loginUser(@RequestBody User newUser) {
-        try {
-            return this.service.loginUser(newUser);
-        } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not found");
-        }
-
-
+    @PostMapping("/login") // add user or say that failed
+    ResponseEntity<User> loginUser(@RequestBody User user) {
+        return this.service.loginUser(user);
     }
 }
