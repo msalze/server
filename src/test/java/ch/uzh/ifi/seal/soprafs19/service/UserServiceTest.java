@@ -5,6 +5,7 @@ import ch.uzh.ifi.seal.soprafs19.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs19.entity.User;
 import ch.uzh.ifi.seal.soprafs19.repository.UserRepository;
 import ch.uzh.ifi.seal.soprafs19.service.UserService;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +37,12 @@ public class UserServiceTest {
     @Autowired
     private UserService userService;
 
+
+    @After
+    public void after() {
+        userRepository.deleteAll();
+    }
+
     @Test
     public void createUser() {
         Assert.assertNull(userRepository.findByUsername("testUsername"));
@@ -47,7 +54,7 @@ public class UserServiceTest {
         User createdUser = userService.createUser(testUser);
 
         Assert.assertNotNull(createdUser.getToken());
-        Assert.assertEquals(createdUser.getStatus(),UserStatus.ONLINE);
+        Assert.assertEquals(createdUser.getStatus(),UserStatus.OFFLINE);
         Assert.assertEquals(createdUser, userRepository.findByToken(createdUser.getToken()));
     }
 
@@ -57,7 +64,6 @@ public class UserServiceTest {
 
     @Test
     public void getUsers() {
-        Assert.assertNull(userRepository.findAll());
         User testUser1 = new User();
         testUser1.setPassword("testPassword");
         testUser1.setUsername("testUsername");
@@ -65,6 +71,9 @@ public class UserServiceTest {
         User testUser2 = new User();
         testUser2.setPassword("password");
         testUser2.setUsername("username");
+
+        testUser1 = userService.createUser(testUser1);
+        testUser2 = userService.createUser(testUser2);
 
         userRepository.save(testUser1);
         userRepository.save(testUser2);
@@ -75,25 +84,29 @@ public class UserServiceTest {
 
     @Test
     public void loginUser() {
+        User user = new User();
+        user.setUsername("testName");
+        user.setPassword("password");
+        User createdUser = userService.createUser(user);
+        user = userService.loginUser(createdUser).getBody();
+        Assert.assertEquals(UserStatus.ONLINE, user.getStatus());
+        Assert.assertNotNull(user.getToken());
     }
 
     @Test
     public void getUserById() {
-        Assert.assertNull(userRepository.findByUsername("testUser"));
-        Assert.assertTrue(userRepository.findById(new Long("1")).isEmpty());
 
         User testUser = new User();
         testUser.setPassword("testPassword");
         testUser.setUsername("testUser");
-        testUser.setId(new Long("1"));
+        User createdUser = userService.createUser(testUser);
 
-        userRepository.save(testUser);
-
-        Assert.assertNotNull(userRepository.findById(new Long("1")));
+        Assert.assertNotNull(userRepository.findById(createdUser.getId()));
 
     }
 
     @Test
     public void updateUser() {
+
     }
 }

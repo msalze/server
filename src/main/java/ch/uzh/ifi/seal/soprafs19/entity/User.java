@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.soprafs19.entity;
 
 import ch.uzh.ifi.seal.soprafs19.constant.UserStatus;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -23,6 +24,7 @@ public class User implements Serializable {
 	@Column(nullable = false, unique = true) 
 	private String username;
 
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@Column(nullable = false)
 	private String password;
 	
