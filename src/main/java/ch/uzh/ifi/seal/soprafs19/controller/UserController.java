@@ -22,13 +22,16 @@ public class UserController {
         return service.getUserById(userId);
     }
 
+    @GetMapping("/users") // get all users
+    Iterable<User> getAll() {
+        return service.getUsers();
+    }
 
-
-
-    @PutMapping("/users/{userId}") // update user
-    String updateUser(@PathVariable Long userId, @RequestBody User user){
-        this.service.updateUser(userId, user);
-        return "";
+    @CrossOrigin(origins = "http://localhost:3000") // TODO: adapat do heroku
+    @PutMapping("/users/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void updateUser(@PathVariable long id, @RequestBody User user){
+        this.service.updateUser(id, user);
     }
 
     @PostMapping("/users") // create new user
@@ -36,13 +39,9 @@ public class UserController {
         return this.service.createUser(newUser);
     }
 
-    @GetMapping("/users") // get all users
-    Iterable<User> getAll() {
-        return service.getUsers();
-    }
-
     @PostMapping("/login") // add user or say that failed
     ResponseEntity<User> loginUser(@RequestBody User user) {
         return this.service.loginUser(user);
     }
+
 }

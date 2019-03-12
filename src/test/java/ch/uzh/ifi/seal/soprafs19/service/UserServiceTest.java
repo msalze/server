@@ -17,7 +17,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.lang.reflect.Array;
+import java.time.LocalDate;
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * Test class for the UserResource REST resource.
@@ -107,6 +109,19 @@ public class UserServiceTest {
 
     @Test
     public void updateUser() {
+        User testUser = new User();
+        testUser.setPassword("testPassword");
+        testUser.setUsername("testUser1");
+        User createdUser = userService.createUser(testUser);
 
+        testUser.setUsername("changedUsername");
+        LocalDate dateOfBirth = LocalDate.now().minusYears(20);
+        testUser.setDateOfBirth(dateOfBirth);
+
+        this.userService.updateUser(createdUser.getId(), testUser);
+        Optional<User> foundUser = this.userRepository.findById(createdUser.getId());
+        Assert.assertTrue(foundUser.isPresent());
+        Assert.assertEquals(foundUser.get().getUsername(), testUser.getUsername());
+        Assert.assertEquals(foundUser.get().getDateOfBirth(), testUser.getDateOfBirth());
     }
 }

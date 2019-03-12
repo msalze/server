@@ -68,10 +68,21 @@ public class UserService {
 
     public void updateUser(Long userId, User user) {
         Optional<User> foundUser = userRepository.findById(userId);
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new UsernameTakenException();
+        }
         if (foundUser.isPresent()){
-
-            user.setToken(foundUser.get().getToken());
-            userRepository.save(user);
+            User getUser = foundUser.get();
+            if (user.getUsername() != null) {
+                getUser.setUsername(user.getUsername());
+            }
+            if (user.getDateOfBirth() != null) {
+                getUser.setDateOfBirth(user.getDateOfBirth());
+            }
+            getUser.setToken(foundUser.get().getToken());
+            userRepository.save(getUser);
+        } else {
+            throw new UserDoesNotExistException();
         }
 
     }
