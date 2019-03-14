@@ -27,10 +27,10 @@ public class UserController {
         return service.getUsers();
     }
 
-    @CrossOrigin(origins = "http://localhost:3000") // TODO: adapat do heroku
+    @CrossOrigin(origins = "http://localhost:3000")
     @PutMapping("/users/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void updateUser(@PathVariable long id, @RequestBody User user){
+    void updateUser(@PathVariable long id, @RequestBody User user){ // use information from RequestBody to update user
         this.service.updateUser(id, user);
     }
 

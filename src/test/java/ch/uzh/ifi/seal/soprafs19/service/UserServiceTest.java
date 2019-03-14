@@ -43,7 +43,7 @@ public class UserServiceTest {
     @After
     public void after() {
         userRepository.deleteAll();
-    }
+    } // delete all entries after test
 
     @Test
     public void createUser() {
@@ -53,19 +53,27 @@ public class UserServiceTest {
         testUser.setPassword("testPassword");
         testUser.setUsername("testUsername");
 
+        // create new user
         User createdUser = userService.createUser(testUser);
 
+        // test for characterization of creating a user
         Assert.assertNotNull(createdUser.getToken());
         Assert.assertEquals(createdUser.getStatus(),UserStatus.OFFLINE);
         Assert.assertEquals(createdUser, userRepository.findByToken(createdUser.getToken()));
-    }
 
-    @Before
-    public void setUp() throws Exception {
+        // if username is already taken, an error needs to be thrown when calling createUser()
+        try {
+            userService.createUser(testUser);
+            Assert.fail();
+        } catch (Exception ex) {
+        }
+
+
     }
 
     @Test
     public void getUsers() {
+        Assert.assertFalse(userService.getUsers().iterator().hasNext());
         User testUser1 = new User();
         testUser1.setPassword("testPassword");
         testUser1.setUsername("testUsername");
@@ -75,12 +83,26 @@ public class UserServiceTest {
         testUser2.setUsername("username");
 
         testUser1 = userService.createUser(testUser1);
+
+        Iterator<User> users = userService.getUsers().iterator();
+
+        // assert that iterator has one element
+        Assert.assertTrue(users.hasNext());
+        users.next();
+        Assert.assertFalse(users.hasNext());
+
+        // add another user
         testUser2 = userService.createUser(testUser2);
 
-        userRepository.save(testUser1);
-        userRepository.save(testUser2);
+        users = userService.getUsers().iterator();
 
-        Iterable<User> output = userRepository.findAll();
+        // assert that repository contains two users
+        Assert.assertTrue(users.hasNext());
+        users.next();
+        Assert.assertTrue(users.hasNext());
+        users.next();
+        Assert.assertFalse(users.hasNext());
+
     }
 
 
@@ -93,18 +115,48 @@ public class UserServiceTest {
         user = userService.loginUser(createdUser).getBody();
         Assert.assertEquals(UserStatus.ONLINE, user.getStatus());
         Assert.assertNotNull(user.getToken());
+
+
+        // assert that error gets thrown if wrong password is used
+        try {
+            user.setPassword("wrongPassword");
+            userService.loginUser(user);
+            Assert.fail("Cannot log in with wrong password");
+        } catch (Exception ex) {
+
+        }
     }
 
     @Test
     public void getUserById() {
-
         User testUser = new User();
         testUser.setPassword("testPassword");
         testUser.setUsername("testUser");
         User createdUser = userService.createUser(testUser);
 
-        Assert.assertNotNull(userRepository.findById(createdUser.getId()));
+        Assert.assertNotNull(userService.getUserById(createdUser.getId()));
 
+        // only one user was created, find id that is not in database and assert that error gets thrown if getUserById() is called
+        long newLong = 123;
+        if (createdUser.getId() != newLong) {
+            try {
+                userService.getUserById(newLong);
+                Assert.fail();
+            } catch (Exception ex) {
+
+            }
+        } else {
+            try {
+                long otherLong = 124;
+                userService.getUserById(otherLong);
+                Assert.fail();
+            } catch (Exception ex) {
+
+            }
+        }
+      /*  try {
+            userService.getUserById()
+        }*/
     }
 
     @Test
@@ -124,4 +176,5 @@ public class UserServiceTest {
         Assert.assertEquals(foundUser.get().getUsername(), testUser.getUsername());
         Assert.assertEquals(foundUser.get().getDateOfBirth(), testUser.getDateOfBirth());
     }
+
 }
